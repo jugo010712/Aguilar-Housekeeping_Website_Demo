@@ -20,18 +20,30 @@ navLinks.querySelectorAll('a').forEach(link => {
   });
 });
 
-// ── Active nav link highlighting ───────────────────────────────
-const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-document.querySelectorAll('.nav-links a').forEach(link => {
-  const href = link.getAttribute('href');
-  if (
-    href === currentPage ||
-    (currentPage === '' && href === 'index.html') ||
-    (currentPage === 'index.html' && href === 'index.html')
-  ) {
-    link.classList.add('active');
-  }
-});
+// ── Scroll-spy: highlight nav link for current section ─────────
+const sections   = document.querySelectorAll('section[id]');
+const navAnchors = document.querySelectorAll('.nav-links a[href^="#"]');
+
+function updateActiveLink() {
+  const scrollY = window.scrollY + navbar.offsetHeight + 32;
+
+  let current = '';
+  sections.forEach(section => {
+    if (scrollY >= section.offsetTop) {
+      current = section.getAttribute('id');
+    }
+  });
+
+  navAnchors.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === `#${current}`) {
+      a.classList.add('active');
+    }
+  });
+}
+
+window.addEventListener('scroll', updateActiveLink, { passive: true });
+updateActiveLink(); // run once on load
 
 // ── Scroll fade-in ─────────────────────────────────────────────
 const fadeEls = document.querySelectorAll('.fade-up');
@@ -45,7 +57,7 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.12 });
 fadeEls.forEach(el => observer.observe(el));
 
-// ── Contact form (only runs on contact.html) ───────────────────
+// ── Contact form ───────────────────────────────────────────────
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
   contactForm.addEventListener('submit', function(e) {
